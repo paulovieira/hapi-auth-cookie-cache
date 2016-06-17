@@ -1,0 +1,30 @@
+{
+  "name": "hapi-auth-session",
+  "version": "0.0.1",
+  "description": "hapi-auth-session",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/paulovieira/hapi-auth-session.git"
+  },
+  "keywords": [
+    "hapi",
+    "auth",
+    "session",
+    "catbox",
+    "cookie"
+  ],
+  "author": "Paulo Vieira <paulovieira@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/paulovieira/hapi-auth-session/issues"
+  },
+  "homepage": "https://github.com/paulovieira/hapi-auth-session#readme",
+  "dependencies": {
+    "hoek": "^4.0.1",
+    "node-uuid": "^1.4.7"
+  }
+}
