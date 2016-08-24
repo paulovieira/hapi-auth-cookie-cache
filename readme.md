@@ -1,5 +1,9 @@
 ## hapi-auth-session
 
+This plugin combines hapi-auth-cookie and catbox to provide a quick and simple way to add authentication endpoints to your Hapi app.
+
+
+
 
 in the main configuration of the server, provide options to create a new catbox client (using, for instance, the "catbox-memory" strategy)
 
