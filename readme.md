@@ -1,7 +1,34 @@
-## hapi-auth-session
+# hapi-auth-cookie-memory
 
-This plugin combines hapi-auth-cookie and catbox to provide a quick and simple way to add authentication endpoints to your Hapi app.
+## Introduction 
 
+This hapijs plugin combines hapi-auth-cookie and hapi's native caching capabilities (providede by catbox) to provide a simple way authentication system to a hapijs application.
+
+## Description
+
+Assumptions / dependencies:
+
+a) hapi-auth-cookie
+The hapi-auth-cookie authentication scheme must been registered before this plugin
+b) catbox client
+The server must have an instance of some catbox client (using 'catbox-memory' for instance, which is part of hapi core)
+
+When this plugin is registered it will do the following:
+
+- Create an authentication strategy using the "cookie" authentication scheme (which is the scheme provided by the hapi-auth-cookie). Options can be given in the plugin option 'strategy' (an object). 
+- Create a catbox policy using the catbox client given in the options. Options can be given in the plugin option 'policy' (an object).
+- Create 2 routes:
+    - One route to handle the login data (usually the username and password) that should be sent though a form. This route has method POST and the path must be given in the plugin option 'loginDataPath'.
+    - One route to handle the logout procedure, which means deleting the cookie and the respective entry in the cache. This route has method GET and the path must be given in the plugin option 'logoutPath'.
+
+After the login data is sent to 'loginDataPath', the handler will execute the function given in the plugin option 'validateLoginData'. This function has signature `function(request, next)`, so the login data is available at `request.payload`. The authentication logic must be implemented here. 
+
+If it succeeds, the `next` callback should be called with `next(null, cacheMe)`, where `cacheMe` is the value to be stored in the cache (usually an object with details about the user, such the username, email, etc).
+
+If the authentication fails, the `next` callback should be called with an error.
+
+
+## Options
 
 
 
