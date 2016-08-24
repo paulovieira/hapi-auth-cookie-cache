@@ -1,28 +1,29 @@
 {
-  "name": "hapi-auth-session",
+  "name": "hapi-auth-cookie-cache",
   "version": "0.0.1",
-  "description": "hapi-auth-session",
+  "description": "hapi-auth-cookie-cache",
   "main": "lib/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/paulovieira/hapi-auth-session.git"
+    "url": "git+https://github.com/paulovieira/hapi-auth-cookie-cache.git"
   },
   "keywords": [
     "hapi",
     "auth",
-    "session",
+    "cookie",
+    "cache",
     "catbox",
-    "cookie"
+    "session"
   ],
   "author": "Paulo Vieira <paulovieira@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/paulovieira/hapi-auth-session/issues"
+    "url": "https://github.com/paulovieira/hapi-auth-cookie-cache/issues"
   },
-  "homepage": "https://github.com/paulovieira/hapi-auth-session#readme",
+  "homepage": "https://github.com/paulovieira/hapi-auth-cookie-cache#readme",
   "dependencies": {
     "node-uuid": "^1.4.7"
   }
