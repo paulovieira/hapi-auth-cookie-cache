@@ -21,12 +21,42 @@ When this plugin is registered it will do the following:
     - One route to handle the login data (usually the username and password) that should be sent though a form. This route has method POST and the path must be given in the plugin option 'loginDataPath'.
     - One route to handle the logout procedure, which means deleting the cookie and the respective entry in the cache. This route has method GET and the path must be given in the plugin option 'logoutPath'.
 
-After the login data is sent to 'loginDataPath', the handler will execute the function given in the plugin option 'validateLoginData'. This function has signature `function(request, next)`, so the login data is available at `request.payload`. The authentication logic must be implemented here. 
+### Execute login/authentication logic - validateLoginData
 
-If it succeeds, the `next` callback should be called with `next(null, cacheMe)`, where `cacheMe` is the value to be stored in the cache (usually an object with details about the user, such the username, email, etc).
+After the login data is sent by the client to the url defined in 'loginDataPath', the handler (defined by the plugin) will execute the function given in the plugin option 'validateLoginData'. This function has signature `function (request, next)`, so the login data is available at `request.payload`. The authentication logic must be implemented here. 
 
-If the authentication fails, the `next` callback should be called with an error.
+If it succeeds, the `next` callback should be called with `next(null, cacheMe)`, where `cacheMe` is a value to be stored in the cache. This is usually an object with some details about the user that have been retrieved from a database, such the username, email, etc. A cookie will also be sent to the client containing just the uuid of the cached value.
 
+If the authentication fails, the `next` callback should be called with a Boom error as the 1st argument (Boom.unauthorized would be correct choice). Optionally the plugin can also reply with a redirect (see below).
+
+### Execute logout logic 
+
+To log out the client, a GET request must be done to the path given in the 'logoutPath' option. The handler will delete the valued previously stored in the cache and clear the cookie. The reply will always be a redirect to the path given in the option 'logoutRedirectTo' (usually either the homepage or the page with the login form).
+
+## Flow
+
+Suppose the client is not authenticated (is not 'logged in').
+
+1) The client visit a page that has a form to send the login data (example: 'GET /login').
+
+2) The login data is POSTed to the path defined in 'loginDataPath' (example: 'POST /login-data'). The authentication logic must be implemented in the 'validateLoginData' function, which receives the request object in the first argument and a 'next' callback in the second.
+
+If the authentication suceeds, the 'next' callback should be called with an object in the 2nd parameter (object with data about the client):
+- That object will be stored in the cache 
+- A cookie with the uuid of the cached data is sent to the client in the response
+- The response will be a redirection to the path given in 'loginRedirectTo' (usually a page with private contents)
+
+If the authentication fails, the 'next' callback should be called with a Boom error in the 1st parameter
+- The response will be a Boom error;
+- The response might alternatively be a redirection to some path (if the error has the property 'redirectTo'). Usually this is the path of the login page.
+
+Note: if the client is already authenticated when the login data is sent (this could happen if the login data was sent in another tab by mistake), the response will simply be a redirection to the path given in 'loginRedirectTo'.
+
+3) After the user is authenticated, all requests to paths that implement the 'cookie-cache' strategy 
+
+
+Note: in step 1, the '/login' route must be defined outside the plugin. The handler should check if the client is already authenticated, and if so reply with a redirection (usually to the path given in 'loginRedirectTo'). That is, if the client is already logged in and tries to visit the page with the login form, the response will be the private page. 
+Also, make sure the route option plugins['hapi-auth-cookie'].redirectTo is not defined, otherwise we might end up with an infinite redirection loop (302 replies) if the user is not authenticated..
 
 ## Options
 

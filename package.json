@@ -24,7 +24,6 @@
   },
   "homepage": "https://github.com/paulovieira/hapi-auth-session#readme",
   "dependencies": {
-    "hoek": "^4.0.1",
     "node-uuid": "^1.4.7"
   }
 }
