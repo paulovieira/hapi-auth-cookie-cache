@@ -88,14 +88,14 @@ In `hapi-auth-cookie-cache` the `validateFunc` is already provided and implement
 In `hapi-auth-cookie-cache` the control is given to the user in the `validateLoginData`, which has similar semantics to the `validateFunc`.
 
 
-## Reasons for authentication failure (in step 3)
+## Reasons for authentication failure ([in step 3](#3-client-can-access-protected-routes))
 
 Suppose a client is already authenticated and a request is made to an endpoint configured with the 'cookie-cache' auth strategy. 
 The authentication can fail for different reasons:
 
 #### 1) There is no cookie 
 
-This happens when the cookie has expired or has been manually deleted by the client. `hapi-auth-cookie` will then call `unauthenticated`, which calls the reply interface with an error.
+This happens when the cookie has expired (the client deletes the cookie) or has been manually deleted by other means. `hapi-auth-cookie` will then call the internal `unauthenticated` function, which calls the reply interface with an error.
 
 #### 2) The cookie has been tampered
 
@@ -106,25 +106,26 @@ In this case the cookie will also be deleted in the client if the option `scheme
 #### 3) The cookie is valid but the uuid doesn't correspond to any value in the cache
 
 When we try to get the cached value (using the internal catbox policy in `validateFunc`), the value will be undefined. The callback to `validateFunc` is called with false in the 2nd argument. 
-'hapi-auth-cookie' will then call `unauthenticated`, so the code proceeds as in the above cases. 
+`hapi-auth-cookie` will then call `unauthenticated` and the code proceeds as in the above cases. 
 
 In this case the cookie will also be deleted in the client if the option `scheme.clearInvalid` is true (there is a call to `reply.unstate`  just before the call to `unauthenticated`).
 
-#### 4) The cookie is valid and there is a corresponding value in the cache, but it has expired
+#### 4) The cookie is valid and there is a corresponding value in the store/table, but it has expired
 
-Similar to the previous case: when we try to get the cached value (in `validateFunc`) the value will be undefined.
+Similar to the previous case: when we try to get the cached value (in `validateFunc`) the value will be undefined. From the point of view of the user of the catbox policy, it's as if there was no value.
+
 
 #### Notes
 
-- An expired value in the cache might or might not be deleted in the database/store. In principle it should be, but that's a concern of the catbox client being used to interface with that database. However when we try to get the value using the catbox policy method 'get', the argument in the callback will be null.
+- An expired value in the cache might or might not be deleted in the database/store. In principle it should be, but that's a concern of the catbox client being used to interface with that database. However when we try to get the value using the catbox policy method 'get', the argument in the callback will be undefined.
 - If there is some internal error when obtaining the value from the cache, the callback to `validateFunc` will be called with that error and `hapi-auth-cookie` will execute the same steps as in case 3.
 
-**Conclusion:** in all 4 cases the cookie will be cleared in the client (if it exists and if the option `scheme.clearInvalid` is set). The response should be a 302 redirection (defined in the handler, which should check `request.auth.isAuthenticated`).
+**Conclusion:** in all the 4 cases the cookie will be cleared in the client (if it exists and if the option `scheme.clearInvalid` is set). The response should be a 302 redirection (defined in the handler, which should check `request.auth.isAuthenticated`).
 
 
 ## Redirection flow from /login to /dashboard
 
-There is a sort of 'inverse' relation betweet the /login and the /dashboard routes, depending on whether the client is authenticated or not.
+It is natural to have a kind of 'inverse' relation betweet the /login and the /dashboard routes (both implemented by the user), depending on whether the client is authenticated or not.
 
 #### 1) if client IS authenticated
 - GET /login -  should redirect to /dashboard
@@ -162,5 +163,5 @@ The following options should also probably be unique per registration (altough n
 - `loginRedirectTo`
 - `logoutPath`
 - `validateLoginData`
-- `policy.segment` (probably makes sense to have a separate store/table for the each group of sessions).
+- `policy.segment` (probably makes sense to have a separate store/table for each group of sessions).
 
