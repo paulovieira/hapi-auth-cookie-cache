@@ -37,7 +37,7 @@ If you have used other `hapi-auth-*` plugins, this should look familiar.
 
 If the submitted login data is valid, `next` should be called as `next(null, true, data)`, where `data` is the 'credentials' object (or 'session' object), that is, an object containing authentication information about the client that will be available in subsequent requests.
 
-That object will be stored in the cache and the respective uuid will be present in a cookie that is sent back to the client. The response will be a 302 redirection to the path given in `loginRedirectTo` (which is usually a page with private contents, for instance, '/dashboard').
+That object will be stored in the cache and the respective uuid will be present in a cookie that is sent back to the client. The response will be a 302 redirection to the path given in `loginRedirectTo` (which is usually a page with private contents, for instance, /dashboard).
 
 If the submitted login data is not valid, `next`  should be called as `next(null, false, redirectTo)`, where `redirectTo` is an optional string with an url. If `redirectTo` is given, the response will be 302 redirection to that url (which usually is the path of the login page - we want to give an immediate new opportunity for the client to submit the login data). If `redirectTo` is not given, the response will be a simple 401 error.
 
@@ -59,9 +59,9 @@ The client makes a GET request to the path defined in 'logoutPath' (example: GET
 
 #### Notes
 
-- In step 1), the handler for the '/login' route should have a guard clause to check if the client is already authenticated when that page is requested, and if so respond with a redirection to the path given in `loginRedirectTo` (see the section ["Redirection flow from /login to /dashboard"](#redirection-flow-from-login-to-dashboard)). 
+- In step 1), the handler for the /login route should have a guard clause to check if the client is already authenticated when that page is requested, and if so respond with a redirection to the path given in `loginRedirectTo` (see the section ["Redirection flow from /login to /dashboard"](#redirection-flow-from-login-to-dashboard)). 
 - In step 2), a similar guard is implemented by the plugin: if the client is already authenticated when the login data is sent (this could happen if the login data was already sent in another tab), the response will be a 302 redirection to the path given in `loginRedirectTo`.
-- For routes defined by the user ('/login', `loginRedirectTo`, `logoutRedirectTo`, and others...), avoid using the `redirectTo` option in `hapi-auth-cookie` (both in the options for scheme and in the route options for plugin). It can cause 302 redirection loops in some cases. The simpler combination is to use auth mode 'try' and not use `redirectTo` (redirections can be done directly in the handler).
+- For routes defined by the user (/login, `loginRedirectTo`, `logoutRedirectTo`, and others...), avoid using the `redirectTo` option in `hapi-auth-cookie` (both in the options for scheme and in the route options for plugin). It can cause 302 redirection loops in some cases. The simpler combination is to use auth mode 'try' and not use `redirectTo` (redirections can be done directly in the handler).
 
 ## Options
 
@@ -69,11 +69,11 @@ The client makes a GET request to the path defined in 'logoutPath' (example: GET
 - `scheme` - object with options for the 'cookie' scheme (implemented by `hapi-auth-cookie`)
 - `strategyName` - string with the name of the strategy (default: 'cookie-cache')
 - `loginDataPath` - string with the path of the route to where the login data should be submitted to. A POST route will be created with this path. Example: '/login-data'.
-- `loginRedirectTo` - string with the path to be used in the redirection after the login process is finished with success. Example: '/dashboard'.
+- `loginRedirectTo` - string with the path to be used in the redirection after the login process is finished with success. Example: /dashboard.
 - `logoutPath` - string with the path of the route to log out the client. A GET route will be created with this path. Example: '/logout'.
 - `logoutRedirectTo` - string with the path to be used in the redirection after the logout process is finished. Example: '/'.or '/login'.
 - `validateLoginData` - function with signature `function(request, next)` that is called by the plugin after the client has submitted the login data (making a POST request to the path defined in `loginDataPath`). 
-If the login data was submitted using an html form, it will be available in `request.payload`. If it is valid, `next` should be called as `next(null, true, data)`, where `data` is the 'credentials' object (or the 'session' object) that will be stored in the cache. The response will be a 302 redirection to the path given in `loginRedirectTo` (which is usually a page with private contents, for instance, '/dashboard')
+If the login data was submitted using an html form, it will be available in `request.payload`. If it is valid, `next` should be called as `next(null, true, data)`, where `data` is the 'credentials' object (or the 'session' object) that will be stored in the cache. The response will be a 302 redirection to the path given in `loginRedirectTo` (which is usually a page with private contents, for instance, /dashboard)
 If the login data is not valid, `next` should be called as `next(null, false, redirectTo)` where `redirectTo` is an optional string with an url. If given, the response will be 302 redirection to that url. If not given, the response will be a simple 401 error.
 
 
@@ -121,9 +121,9 @@ Similar to the previous case: when we try to get the cached value (in `validateF
 **Conclusion:** in all 4 cases the cookie will be cleared in the client (if it exists and if the option `scheme.clearInvalid` is set). The response should be a 302 redirection (defined in the handler, which should check `request.auth.isAuthenticated`).
 
 
-## Redirection flow from '/login' to '/dashboard'
+## Redirection flow from /login to /dashboard
 
-There is a sort of 'inverse' relation betweet the '/login' and the '/dashboard' routes, depending on whether the client is authenticated or not.
+There is a sort of 'inverse' relation betweet the /login and the /dashboard routes, depending on whether the client is authenticated or not.
 
 #### 1) if client IS authenticated
 - GET /login -  should redirect to /dashboard
