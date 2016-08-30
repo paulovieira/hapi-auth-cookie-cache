@@ -2,29 +2,27 @@
 
 ## Introduction 
 
-This hapi plugin combines [`hapi-auth-cookie`](https://github.com/hapijs/hapi-auth-cookie) and hapi's native [caching capabilities](http://hapijs.com/api#servercacheoptions) to provide a simple way to implement an authentication system in a hapijs application.
+This hapi plugin combines [`hapi-auth-cookie`](https://github.com/hapijs/hapi-auth-cookie) and hapi's native [caching capabilities](http://hapijs.com/api#servercacheoptions) to provide a simple and reusable authentication system.
 
 ## Description
 
 Assumptions / dependencies:
 
-a. 'cookie' scheme - the 'cookie' authentication scheme must be registered (this scheme is provided by `hapi-auth-cookie`
-b. catbox client - the server must have an instance of some catbox client (could be [catbox-memory](https://github.com/hapijs/catbox-memory) for instance, which is part of hapi core)
+- 'cookie' scheme - the 'cookie' authentication scheme must be registered (this scheme is provided by `hapi-auth-cookie`)
+- catbox client - the server must have an instance of some catbox client (could be [catbox-memory](https://github.com/hapijs/catbox-memory) for instance, which is part of hapi core)
 
 When this plugin is registered it will do the following:
 
-- Creates an [authentication strategy](http://hapijs.com/api#serverauthstrategyname-scheme-mode-options) named 'cookie-cache', which uses the 'cookie' authentication scheme
+- Creates an [authentication strategy](http://hapijs.com/api#serverauthstrategyname-scheme-mode-options) based on the 'cookie' authentication scheme
 - Creates a [catbox policy](http://hapijs.com/api#servercacheoptions) using the catbox client previously configured
 - Creates 2 routes:
-    - One route to handle the submission of the login data (usually the username and password)
+    - One route to handle the submission of the login data (usually the username and password, via an html form)
     - One route to handle the logout procedure (clear the cookie in the client and delete the respective entry in the cache)
 
 In other words, the functionality provided by this plugin consists in the generic components of a simple cookie-based login system (stuff that can be reused).
 
 
 ## Workflow
-
-Here is a more detailed description of the usual process.
 
 Suppose the client is not authenticated (is not 'logged in').
 
@@ -34,21 +32,20 @@ The client visit a page with a form that allows to submit the login data (exampl
 
 #### 2) client sends the login data
 
-The login data is POSTed to the path defined in 'loginDataPath' (example: 'POST /login-data'). The validation logic must be implemented in the 'validateLoginData' function, which has signature `function(request, next)`, and where the `next` callback has signature `function(err, isValid, data)`.
-If you have used other `hapi-auth-*` plugins, this will sound familiar.
+The login data is POSTed to the path defined in 'loginDataPath' (example: 'POST /login-data'). The validation logic must be implemented in the `validateLoginData` function. This function has signature `function(request, next)`, where the `next` callback has signature `function(err, isValid, data)`.
+If you have used other `hapi-auth-*` plugins, this should look familiar.
 
-If the submitted login data is valid, `next` should be called as `next(null, true, data)`, where `data` is the 'credentials' object (or 'session' object), that is, an object containing authentication information about the client and will be available in subsequent requests.
+If the submitted login data is valid, `next` should be called as `next(null, true, data)`, where `data` is the 'credentials' object (or 'session' object), that is, an object containing authentication information about the client that will be available in subsequent requests.
 
-That object will be stored in the cache and the respective uuid will be present in a cookie that is sent back to the client. The response will be a 302 redirection to the path given in `loginRedirectTo` (which is usually a page with private contents, for instance, '/private').
+That object will be stored in the cache and the respective uuid will be present in a cookie that is sent back to the client. The response will be a 302 redirection to the path given in `loginRedirectTo` (which is usually a page with private contents, for instance, '/dashboard').
 
-If the submitted login data is not valid, `next`  should be called as `next(null, false, redirectTo)`, where `redirectTo` is an optional string. If `redirectTo` is given, the response will be 302 redirection to the url given in that string (this is usually the path of the login page - we want to give immediately give a new opportunity for the client to submit the login data). If `redirectTo` is not given, the response will be a simple 401 error.
+If the submitted login data is not valid, `next`  should be called as `next(null, false, redirectTo)`, where `redirectTo` is an optional string with an url. If `redirectTo` is given, the response will be 302 redirection to that url (which usually is the path of the login page - we want to give an immediate new opportunity for the client to submit the login data). If `redirectTo` is not given, the response will be a simple 401 error.
 
 #### 3) client can access protected routes
 
-If the submitted login data is valid, the client is now authenticated. The requests to routes that use the 'cookie-cache' strategy (example: 'GET /private') will now reach the handler and the session data is available in `request.auth.credentials`.
+If the submitted login data was valid, the client is now authenticated. The requests to routes protected with the 'cookie-cache' strategy (which is the default name for the strategy) will now reach the handler and the session data is available in `request.auth.credentials`.
 
-If authentication fails and if the route configuration uses auth mode 'try', the handler is still executed. In that case we have `request.auth.isAuthenticated` false and there is no session data.
-
+If authentication fails for some reason (for instance, the session data might have expired, see below) and if the route configuration uses auth mode 'try', the handler is still executed. In that case we have `request.auth.isAuthenticated` false and there is no session data in `request.auth.credentials`.
 
 Note: a request to a protected route will execute the `validateFunc` option given to `hapi-auth-cookie`. This function is implemented directly by this plugin and has a generic logic to interact with the cache:
 1) retrieve the session object from the cache (the cache key is the uuid given by the cookie)
@@ -62,7 +59,7 @@ The client makes a GET request to the path defined in 'logoutPath' (example: 'GE
 
 #### Notes
 
-- In step 1), the handler for the '/login' route should have guard clause to check if the client is already authenticated when that page is requested, and if so respond with a redirection to the path given in `loginRedirectTo` (see the section 'Redirection flow from /login to /private'). 
+- In step 1), the handler for the '/login' route should have guard clause to check if the client is already authenticated when that page is requested, and if so respond with a redirection to the path given in `loginRedirectTo` (see the section 'Redirection flow from /login to /dashboard'). 
 - In step 2), a similar guard is implemented by the plugin: if the client is already authenticated when the login data is sent (this could happen if the login data was already sent in another tab), the response will be a 302 redirection to the path given in `loginRedirectTo`.
 - For routes defined by the user (`loginRedirectTo`, `logoutRedirectTo`, and others...), avoid using the `redirectTo` option in `hapi-auth-cookie` (both in the options for scheme and in the route options for plugin). It can cause 302 redirection loops in some cases. The simpler combination is to use auth mode 'try' and not use `redirectTo` (redirections can be done directly in the handler).
 
@@ -72,11 +69,11 @@ The client makes a GET request to the path defined in 'logoutPath' (example: 'GE
 - `scheme` - object with options for the 'cookie' scheme (implemented by `hapi-auth-cookie`)
 - `strategyName` - string with the name of the strategy (default: 'cookie-cache')
 - `loginDataPath` - string with the path of the route to where the login data should be submitted to. A POST route will be created with this path. Example: '/login-data'.
-- `loginRedirectTo` - string with the path to be used in the redirection after the login process is finished with success. Example: '/private'.
+- `loginRedirectTo` - string with the path to be used in the redirection after the login process is finished with success. Example: '/dashboard'.
 - `logoutPath` - string with the path of the route to log out the client. A GET route will be created with this path. Example: '/logout'.
 - `logoutRedirectTo` - string with the path to be used in the redirection after the logout process is finished. Example: '/'.or '/login'.
 - `validateLoginData` - function with signature `function(request, next)` that is called by the plugin after the client has submitted the login data (making a POST request to the path defined in `loginDataPath`). 
-If the login data was submitted using an html form, it will be available in `request.payload`. If it is valid, `next` should be called as `next(null, true, data)`, where `data` is the 'credentials' object (or the 'session' object) that will be stored in the cache. The response will be a 302 redirection to the path given in `loginRedirectTo` (which is usually a page with private contents, for instance, '/private')
+If the login data was submitted using an html form, it will be available in `request.payload`. If it is valid, `next` should be called as `next(null, true, data)`, where `data` is the 'credentials' object (or the 'session' object) that will be stored in the cache. The response will be a 302 redirection to the path given in `loginRedirectTo` (which is usually a page with private contents, for instance, '/dashboard')
 If the login data is not valid, `next` should be called as `next(null, false, redirectTo)` where `redirectTo` is an optional string with an url. If given, the response will be 302 redirection to that url. If not given, the response will be a simple 401 error.
 
 
@@ -124,25 +121,25 @@ Similar to the previous case: when we try to get the cached value (in `validateF
 **Conclusion:** in all 4 cases the cookie will be cleared in the client (if it exists and if the option `scheme.clearInvalid` is set). The response should be a 302 redirection (defined in the handler, which should check `request.auth.isAuthenticated`).
 
 
-## Redirection flow from '/login' to '/private'
+## Redirection flow from '/login' to '/dashboard'
 
-There is a sort of 'inverse' relation betweet the '/login' and the '/private' routes, depending on whether the client is authenticated or not.
+There is a sort of 'inverse' relation betweet the '/login' and the '/dashboard' routes, depending on whether the client is authenticated or not.
 
 #### 1) if client IS authenticated
-- GET /login -  should redirect to /private
-- GET /private - should complete the request (show the page, send the payload, etc)
+- GET /login -  should redirect to /dashboard
+- GET /dashboard - should complete the request (show the page, send the payload, etc)
 
 #### 2) if client IS NOT authenticated
 - GET /login - should complete the request (show the page)
-- GET /private - should redirect to /login
+- GET /dashboard - should redirect to /login
 
 Looking at it in other angle:
 
 #### 3) for the /login route
-- if the client IS authenticated - should redirect to /private
+- if the client IS authenticated - should redirect to /dashboard
 - if the client IS NOT authenticated - should complete the request
 
-#### 4) for the /private route (the inverse)
+#### 4) for the /dashboard route (the inverse)
 - if the client IS authenticated - should complete the request
 - if the client IS NOT authenticated - should redirect to /login
 
