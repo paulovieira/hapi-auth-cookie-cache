@@ -74,8 +74,8 @@ The client makes a GET request to the path defined in 'logoutPath' (example: GET
 - `logoutRedirectTo` - string with the path or url to be used in the redirection done after the logout process is finished. Example: '/'.or '/login'.
 - `validateLoginData` - function with signature `function(request, next)` that is called by the plugin when the client submits the login data (making a POST request to the path defined in `loginDataPath`). 
 If the login data was submitted using an html form, it will be available in `request.payload`.  
-If it is valid, `next` should be called as `next(null, true, data)`, where `data` is the 'credentials' object (or the 'session' object) that will be stored in the cache. The response will be a 302 redirection to the path given in `loginRedirectTo` (which is usually a page with private contents, for instance, /dashboard).   
-If the login data is not valid, `next` should be called as `next(null, false, redirectTo)` where `redirectTo` is an optional string with an url. If given, the response will be 302 redirection to that url. If not given, the response will be a simple 401 error.
+    + If it is valid, `next` should be called as `next(null, true, data)`, where `data` is the 'credentials' object (or the 'session' object) that will be stored in the cache. The response will be a 302 redirection to the path given in `loginRedirectTo` (which is usually a page with private contents, for instance, /dashboard).   
+    + If the login data is not valid, `next` should be called as `next(null, false, redirectTo)` where `redirectTo` is an optional string with an url. If given, the response will be 302 redirection to that url. If not given, the response will be a simple 401 error.
 
 
 
