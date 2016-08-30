@@ -48,9 +48,9 @@ If the submitted login data was valid, the client is now authenticated. The requ
 If authentication fails for some reason (for instance, the session data might have expired, see below) and if the route configuration uses auth mode 'try', the handler is still executed. In that case we have `request.auth.isAuthenticated` false and there is no session data in `request.auth.credentials`.
 
 Note: a request to a protected route will execute the `validateFunc` option given to `hapi-auth-cookie`. This function is implemented directly by this plugin and has a generic logic to interact with the cache:
-1) retrieve the session object from the cache (the cache key is the uuid given by the cookie)
-2) if the object doesn't exist or has expired, authentication fails; call the callback passed to `validateFunc` with false in the 2nd parameter (which results in `hapi-auth-cookie` clearing the cookie, if it exists)
-3) if the object exists in the cache and is not expired, authentication succeeds; call the callback with true in the 2nd parameter and the object in the 3rd (in the handler the object will be available at `request.auth.credentials`);
+- retrieve the session object from the cache (the cache key is the uuid given by the cookie)
+- if the object doesn't exist or has expired, authentication fails; execute the callback passed to `validateFunc` with false in the 2nd parameter (which results in `hapi-auth-cookie` clearing the cookie, if it exists)
+- if the object exists in the cache and is not expired, authentication succeeds; execute the callback with true in the 2nd parameter and the object in the 3rd (in the handler the object will be available at `request.auth.credentials`);
 
 #### 4) client logs out
 
@@ -59,7 +59,7 @@ The client makes a GET request to the path defined in 'logoutPath' (example: 'GE
 
 #### Notes
 
-- In step 1), the handler for the '/login' route should have guard clause to check if the client is already authenticated when that page is requested, and if so respond with a redirection to the path given in `loginRedirectTo` (see the section 'Redirection flow from /login to /dashboard'). 
+- In step 1), the handler for the '/login' route should have a guard clause to check if the client is already authenticated when that page is requested, and if so respond with a redirection to the path given in `loginRedirectTo` (see the section [Redirection flow from /login to /dashboard](#https://github.com/paulovieira/hapi-auth-cookie-cache#redirection-flow-from-login-to-dashboard)). 
 - In step 2), a similar guard is implemented by the plugin: if the client is already authenticated when the login data is sent (this could happen if the login data was already sent in another tab), the response will be a 302 redirection to the path given in `loginRedirectTo`.
 - For routes defined by the user (`loginRedirectTo`, `logoutRedirectTo`, and others...), avoid using the `redirectTo` option in `hapi-auth-cookie` (both in the options for scheme and in the route options for plugin). It can cause 302 redirection loops in some cases. The simpler combination is to use auth mode 'try' and not use `redirectTo` (redirections can be done directly in the handler).
 
