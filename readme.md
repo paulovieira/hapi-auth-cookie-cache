@@ -59,9 +59,9 @@ The client makes a GET request to the path defined in 'logoutPath' (example: 'GE
 
 #### Notes
 
-- In step 1), the handler for the '/login' route should have a guard clause to check if the client is already authenticated when that page is requested, and if so respond with a redirection to the path given in `loginRedirectTo` (see the section [Redirection flow from /login to /dashboard](#https://github.com/paulovieira/hapi-auth-cookie-cache#redirection-flow-from-login-to-dashboard)). 
+- In step 1), the handler for the '/login' route should have a guard clause to check if the client is already authenticated when that page is requested, and if so respond with a redirection to the path given in `loginRedirectTo` (see the section ["Redirection flow from /login to /dashboard"](#redirection-flow-from-login-to-dashboard)). 
 - In step 2), a similar guard is implemented by the plugin: if the client is already authenticated when the login data is sent (this could happen if the login data was already sent in another tab), the response will be a 302 redirection to the path given in `loginRedirectTo`.
-- For routes defined by the user (`loginRedirectTo`, `logoutRedirectTo`, and others...), avoid using the `redirectTo` option in `hapi-auth-cookie` (both in the options for scheme and in the route options for plugin). It can cause 302 redirection loops in some cases. The simpler combination is to use auth mode 'try' and not use `redirectTo` (redirections can be done directly in the handler).
+- For routes defined by the user ('/login', `loginRedirectTo`, `logoutRedirectTo`, and others...), avoid using the `redirectTo` option in `hapi-auth-cookie` (both in the options for scheme and in the route options for plugin). It can cause 302 redirection loops in some cases. The simpler combination is to use auth mode 'try' and not use `redirectTo` (redirections can be done directly in the handler).
 
 ## Options
 
