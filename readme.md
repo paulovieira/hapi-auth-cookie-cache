@@ -28,11 +28,11 @@ Suppose the client is not authenticated (is not 'logged in').
 
 #### 1) client visits the login page
 
-The client visit a page with a form that allows to submit the login data (example: 'GET /login'). This route/page must be implemented outside of this plugin.
+The client visit a page with a form that allows to submit the login data (example: GET /login). This route/page must be implemented outside of this plugin.
 
 #### 2) client sends the login data
 
-The login data is POSTed to the path defined in 'loginDataPath' (example: 'POST /login-data'). The validation logic must be implemented in the `validateLoginData` function. This function has signature `function(request, next)`, where the `next` callback has signature `function(err, isValid, data)`.
+The login data is POSTed to the path defined in the option `loginDataPath` (example: POST /login-data). The validation logic must be implemented in the `validateLoginData` function. This function has signature `function(request, next)`, where the `next` callback has signature `function(err, isValid, data)`.
 If you have used other `hapi-auth-*` plugins, this should look familiar.
 
 If the submitted login data is valid, `next` should be called as `next(null, true, data)`, where `data` is the 'credentials' object (or 'session' object), that is, an object containing authentication information about the client that will be available in subsequent requests.
@@ -54,7 +54,7 @@ Note: a request to a protected route will execute the `validateFunc` option give
 
 #### 4) client logs out
 
-The client makes a GET request to the path defined in 'logoutPath' (example: 'GET /logout'). The handler will clear the cookie and delete the entry in the cache. The response is a 302 redirection to the path given in `logoutRedirectTo` (usually the login page or the homepage).
+The client makes a GET request to the path defined in 'logoutPath' (example: GET /logout). The handler will clear the cookie and delete the entry in the cache. The response is a 302 redirection to the path given in `logoutRedirectTo` (usually the login page or the homepage).
 
 
 #### Notes
@@ -148,17 +148,18 @@ Looking at it in other angle:
 
 ## register multple times
 
-This plugin can be registered multiple times. This can be used to implement separate login systems in the same app.
+This plugin can be registered multiple times. This can be used to implement multiple (independent) login systems in the same app.
 
 The following options must be unique per registration:
 
-- schemeName (default is 'cookie-cache')
-- scheme.cookie (default is 'sid')
-- scheme.requestDecoratorName (default is 'cookieAuth')
+- `schemeName` (default is 'cookie-cache')
+- `scheme.cookie` (default is 'sid')
+- `scheme.requestDecoratorName` (default is 'cookieAuth')
 
 The following options should also probably be unique per registration (altough not technically necessary):
-- loginDataPath 
-- loginRedirectTo
-- logoutPath
-- policy.segment (default is 'sessions' - probably makes sense to separate where the sessions)
+- `loginDataPath`
+- `loginRedirectTo`
+- `logoutPath`
+- `validateLoginData`
+- `policy.segment` (probably makes sense to have a separate store/table for the each group of sessions).
 
