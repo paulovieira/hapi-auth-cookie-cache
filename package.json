@@ -25,6 +25,7 @@
   },
   "homepage": "https://github.com/paulovieira/hapi-auth-cookie-cache#readme",
   "dependencies": {
+    "boom": "^4.0.0",
     "node-uuid": "^1.4.7"
   }
 }
