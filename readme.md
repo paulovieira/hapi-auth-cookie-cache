@@ -141,8 +141,8 @@ The table below summarizes these relations:
 
 |                                   | /login                                                                           | /dashboard |
 | :---:                             |     :---:                                                                        |          :---: |
-| **request is authenticated**      | response should be a 302 redirect to /dashboard (`reply.redirect('/dashboard')`) | response should be the html   |
-| **request is not authenticated**  | response should be the html                                                      | response should be a 302 redirect to /login (`reply.redirect(loginRedirectTo)`)     |
+| **request is authenticated**      | response should be a 302 redirect to /dashboard (example: `reply.redirect(loginRedirectTo)`) | response should be the html   |
+| **request is not authenticated**  | response should be the html                                                      | response should be a 302 redirect to /login (example: `reply.redirect(logoutRedirectTo)`)     |
 
 Note that these responses should be handled by the application.
 
