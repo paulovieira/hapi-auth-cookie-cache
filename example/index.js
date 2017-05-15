@@ -81,7 +81,7 @@ const AuthCookieCache = {
             // route had auth === false);
 
             // note: if strategy mode is 'optional', it works the same way (but it seems to be a bug in hapi-auth-cookie)
-            redirectOnTry: true,
+            redirectOnTry: false,
 
             // important: do not set redirectTo here, use instead the route level configuration at
             // config.plugins.["hapi-auth-cookie"].redirectTo
