@@ -1,6 +1,6 @@
 {
   "name": "hapi-auth-cookie-cache",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "hapi-auth-cookie-cache",
   "main": "lib/index.js",
   "scripts": {
@@ -27,5 +27,9 @@
   "dependencies": {
     "boom": "^4.0.0",
     "node-uuid": "^1.4.7"
+  },
+  "peerDependencies": {
+    "hapi": ">=11.x.x",
+    "hapi-auth-cookie": ">=6.x.x"
   }
 }

@@ -1,0 +1,7 @@
+{
+	"dependencies": {
+	  "hapi": ">=11.x.x",
+	  "hapi-auth-cookie": ">=6.x.x",
+	  "catbox-memory": ">=2.x.x"
+	}
+}
